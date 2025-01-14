@@ -9,3 +9,6 @@ data/
 
 # Build outputs
 dist/
+
+# Environmental variables
+.env
