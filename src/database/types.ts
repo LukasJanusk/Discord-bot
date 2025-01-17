@@ -12,9 +12,31 @@ export type Generated<T> =
 
 export interface Message {
   id: Generated<number>;
+  sentAt: string;
+  sprintId: number;
+  templateId: number;
+  userId: number;
+}
+
+export interface Sprint {
+  id: Generated<number>;
+  name: string;
+}
+
+export interface Template {
+  id: Generated<number>;
+  text: string;
   title: string;
+}
+
+export interface User {
+  discordName: string;
+  id: Generated<number>;
 }
 
 export interface DB {
   message: Message;
+  sprint: Sprint;
+  template: Template;
+  user: User;
 }
