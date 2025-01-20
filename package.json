@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
-    "migrate:latest": "tsx src/database/migrate",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate:latest": "tsx src/database/migrate/bin",
+    "test": "vitest",
     "gen:types": "kysely-codegen --camel-case --dialect sqlite --out-file src/database/types.ts && prettier --write src/database/types.ts"
   },
   "keywords": [],
@@ -33,12 +33,14 @@
     "kysely-codegen": "^0.17.0",
     "prettier": "^3.2.5",
     "supertest": "^7.0.0",
-    "tsx": "^4.7.2"
+    "tsx": "^4.7.2",
+    "vitest": "^3.0.2"
   },
   "dependencies": {
     "better-sqlite3": "^8.7.0",
     "express": "^4.19.2",
     "http-status-codes": "^2.3.0",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "zod": "^3.24.1"
   }

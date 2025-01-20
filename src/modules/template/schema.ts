@@ -1,16 +1,23 @@
 import { z } from 'zod';
+import type { Template } from '@/database';
 
-// validation schema
+type Record = Template;
 const schema = z.object({
-  id: z.coerce.number().int(),
-  text: z.string(),
-  title: z.string(),
+  id: z.coerce.number().int().positive(),
+  title: z.string().min(1).max(500),
+  text: z.string().min(1).max(100000),
 });
 
-// parsers for validating and coercing data
-const insertable = schema.omit({ id: true });
-const partial = insertable.partial();
+const insertable = schema.omit({
+  id: true,
+});
+const updateable = insertable.partial();
 
+export const parse = (record: unknown) => schema.parse(record);
 export const parseId = (id: unknown) => schema.shape.id.parse(id);
 export const parseInsertable = (record: unknown) => insertable.parse(record);
-export const parsePartial = (record: unknown) => partial.parse(record);
+export const parseUpdateable = (record: unknown) => updateable.parse(record);
+
+export const keys: (keyof Record)[] = Object.keys(
+  schema.shape,
+) as (keyof z.infer<typeof schema>)[];

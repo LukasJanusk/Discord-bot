@@ -1,74 +1,52 @@
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import * as templates from './repository';
+import { Database } from '@/database';
+import { jsonRoute } from '@/utils/middleware';
+import buildRepository from './repository';
 import * as schema from './schema';
+import { TemplateNotFound } from './errors';
 
-const router = Router();
+export default (db: Database) => {
+  const router = Router();
+  const templates = buildRepository(db);
 
-router.get('/', async (req, res) => {
-  try {
-    const templateList = await templates.findAll();
+  router
+    .route('/')
+    .get(jsonRoute(templates.findAll))
+    .post(
+      jsonRoute(async (req) => {
+        const body = schema.parseInsertable(req.body);
 
-    res.status(StatusCodes.OK).json(templateList);
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: (error as Error).message,
-    });
-  }
-});
+        return templates.create(body);
+      }, StatusCodes.CREATED),
+    );
+  router
+    .route('/:id(\\d+)')
+    .get(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+        const record = await templates.findById(id);
 
-router.post('/', async (req, res) => {
-  try {
-    const body = schema.parseInsertable(req.body);
-    const article = await templates.create(body);
+        if (!record) {
+          throw new TemplateNotFound();
+        }
 
-    res.status(StatusCodes.CREATED).json(article);
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      error: (error as Error).message,
-    });
-  }
-});
+        return record;
+      }),
+    )
+    .patch(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+        const bodyPatch = schema.parseUpdateable(req.body);
+        const record = await templates.update(id, bodyPatch);
 
-router.get('/:id', async (req, res) => {
-  try {
-    const id = schema.parseId(req.params.id);
-    const template = await templates.findById(id);
+        if (!record) {
+          throw new TemplateNotFound();
+        }
 
-    if (!template) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        error: 'Article not found',
-      });
-      return;
-    }
+        return record;
+      }),
+    );
 
-    res.status(StatusCodes.OK).json(template);
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      error: (error as Error).message,
-    });
-  }
-});
-
-router.patch('/:id', async (req, res) => {
-  try {
-    const id = schema.parseId(req.params.id);
-    const bodyPatch = schema.parsePartial(req.body);
-    const article = await articles.update(id, bodyPatch);
-
-    if (!article) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        error: 'Article not found',
-      });
-      return;
-    }
-
-    res.status(StatusCodes.OK).json(article);
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      error: (error as Error).message,
-    });
-  }
-});
-
-export default router;
+  return router;
+};
