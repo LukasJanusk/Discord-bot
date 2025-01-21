@@ -1,65 +1,57 @@
-import supertest from 'supertest';
 import { omit } from 'lodash/fp';
+import createTestDatabase from '@tests/utils/createTestDatabase';
+import { createFor } from '@tests/utils/records';
+import { describe, it, expect, afterEach, afterAll } from 'vitest';
+import supertest from 'supertest';
 import createApp from '@/app';
+import { fakeTemplate, templateMatcher } from './utils';
 
-// our test database is completely empty and it is only used by
-// this test module, so we are free to do whatever we want with it
+const db = await createTestDatabase();
+const app = createApp(db);
 
-// const db = await createTestDatabase();
-// const app = createApp(db);
-
-// builds helper function to create articles
-
-// const createArticles = createFor(db, 'article');
+const createTemplates = createFor(db, 'template');
 
 afterEach(async () => {
-  // clearing the tested table after each test
-  await db.deleteFrom('article').execute();
+  await db.deleteFrom('template').execute();
 });
 
-// close the database connection after all tests
-// For SQLite, this is not necessary, but for other databases, it is.
-// afterAll(() => db.destroy());
+afterAll(() => db.destroy());
 
-// This is not called "contoller.spec.ts" because we are specifying what this
-// entire module should do, not just the controller.
-
-// This could be moved to root-level tests folder, however, nearly always
-// breaking tests here means issues in the articles module, so we are colocating
-// it with the module.
 describe('GET', () => {
   it('should return an empty array when there are no templates', async () => {
-    // ACT (When we request...)
-    // ASSERT (Then we should get...)
+    const { body } = await supertest(app).get('/templates').expect(200);
+
+    expect(body).toEqual([]);
   });
 
   it('should return a list of existing templates', async () => {
-    // ARRANGE (Given that we have...)
-    // create fake templates in the db
-    // ACT (When we request...)
-    // ASSERT (Then we should get...)
+    createTemplates([
+      fakeTemplate(),
+      fakeTemplate({ title: 'Title2', text: 'Text2' }),
+    ]);
+    const { body } = await supertest(app).get('/templates').expect(200);
+    expect(body.length).toEqual(2);
+    expect(body).toEqual([
+      templateMatcher(),
+      templateMatcher({ title: 'Title2', text: 'Text2' }),
+    ]);
   });
 });
 
 describe('GET /:id', () => {
   it('should return 404 if template does not exist', async () => {
-    // ACT (When we request...)
-    // ASSERT (Then we should get...)
-    // Some error message that contains "not found".
+    const { body } = await supertest(app).get('/templates/999').expect(404);
     expect(body.error.message).toMatch(/not found/i);
   });
 
   it('should return an template if it exists', async () => {
-    // ARRANGE (Given that we have...)
-    // create fake template
+    createTemplates([fakeTemplate({ id: 777 })]);
 
-    // ACT (When we request...)
-    // request fake article
+    const { body } = await supertest(app).get('/templates/777').expect(200);
 
-    // ASSERT (Then we should get...)
     expect(body).toEqual(
-      articleMatcher({
-        id: 1371,
+      templateMatcher({
+        id: 777,
       }),
     );
   });
@@ -67,67 +59,104 @@ describe('GET /:id', () => {
 
 describe('POST', () => {
   it('should return 400 if title is missing', async () => {
-    // ACT (When we request...)
-    // const { body } = await supertest(app)
-    //   .post('/articles')
-    //   .send(omit(['title'], fakeArticle({})))
-      .expect(400); // a cheeky convenient expectation inside of ACT
-
-    // ASSERT (Then we should get...)
+    const { body } = await supertest(app)
+      .post('/templates')
+      .send(omit(['title'], fakeTemplate({})))
+      .expect(400);
     expect(body.error.message).toMatch(/title/i);
   });
 
   it('should return 400 if text is missing', async () => {
-    // ACT (When we request...)
     const { body } = await supertest(app)
       .post('/templates')
-      .send(omit(['text'], fakeArticle({})))
+      .send(omit(['text'], fakeTemplate({})))
       .expect(400);
-
-    // ASSERT (Then we should get...)
-    expect(body.error.message).toMatch(/content/i);
+    expect(body.error.message).toMatch(/text/i);
   });
 
   it('does not allow to create an article with an empty title', async () => {
-    // ACT (When we request...)
-    // const { body } = await supertest(app)
-    //   .post('/articles')
-    //   .send(fakeArticle({ title: '' }))
-    //   .expect(400);
-
-    // ASSERT (Then we should get...)
-    // expect(body.error.message).toMatch(/title/i);
+    const { body } = await supertest(app)
+      .post('/templates')
+      .send(fakeTemplate({ title: '' }))
+      .expect(400);
+    expect(body.error.message).toMatch(/title/i);
   });
 
   it('does not allow to create an template with empty text', async () => {
-    // const { body } = await supertest(app)
-    //   .post('/articles')
-    //   .send(fakeArticle({ content: '' }))
-    //   .expect(400);
-
-    // expect(body.error.message).toMatch(/content/i);
+    const { body } = await supertest(app)
+      .post('/templates')
+      .send(fakeTemplate({ text: '' }))
+      .expect(400);
+    expect(body.error.message).toMatch(/text/i);
   });
 
   it('should return 201 and created template record', async () => {
-    // ACT (When we request...)
-    // to create a template
-    // ASSERT :
-    // article was created with correct response code
+    const { body } = await supertest(app)
+      .post('/templates')
+      .send(fakeTemplate())
+      .expect(201);
+
+    expect(body).toEqual(templateMatcher(fakeTemplate()));
   });
 });
 
 describe('PATCH /:id', () => {
   it('returns 404 if article does not exist', async () => {
+    const { body } = await supertest(app)
+      .patch('/templates/999')
+      .send(fakeTemplate())
+      .expect(404);
+
+    expect(body.error.message).toMatch(/not found/i);
   });
 
   it('allows partial updates', async () => {
+    createTemplates([fakeTemplate({ id: 111, title: 'fake template' })]);
+
+    const { body } = await supertest(app)
+      .patch('/templates/111')
+      .send({ title: 'updated fake template' })
+      .expect(200);
+
+    expect(body).toEqual(
+      templateMatcher({
+        id: 111,
+        title: 'updated fake template',
+      }),
+    );
   });
 
   it('persists changes', async () => {
+    await createTemplates([fakeTemplate({ id: 222 })]);
+
+    await supertest(app)
+      .patch('/templates/222')
+      .send({ title: 'updated fake template', text: 'updated text' })
+      .expect(200);
+
+    const { body } = await supertest(app).get('/templates/222').expect(200);
+
+    expect(body).toEqual(
+      templateMatcher({
+        id: 222,
+        title: 'updated fake template',
+        text: 'updated text',
+      }),
+    );
   });
 });
 
 describe('DELETE', () => {
-  it('does not allo deleting templates ', async () => {
+  it('deletes template', async () => {
+    await createTemplates([fakeTemplate({ id: 333 })]);
+
+    const { body } = await supertest(app).delete('/templates/333').expect(200);
+
+    expect(body).toEqual(templateMatcher({ id: 333 }));
+  });
+  it('returns 404 not found when id not found in db is privided', async () => {
+    const { body } = await supertest(app).delete('/templates/123').expect(404);
+
+    expect(body.error.message).toMatch(/not found/i);
   });
 });

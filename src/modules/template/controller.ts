@@ -46,6 +46,18 @@ export default (db: Database) => {
 
         return record;
       }),
+    )
+    .delete(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+        const record = await templates.remove(id);
+
+        if (!record) {
+          throw new TemplateNotFound();
+        }
+
+        return record;
+      }),
     );
 
   return router;
