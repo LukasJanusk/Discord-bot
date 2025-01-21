@@ -2,8 +2,9 @@ import express from 'express';
 import { type Database } from './database';
 import jsonErrorHandler from './middleware/jsonErrors';
 import templates from './modules/template/controller';
+import { DiscordBot } from './modules/message/services/discord';
 
-export default function createApp(db: Database) {
+export default async function createApp(db: Database, bot: DiscordBot) {
   const app = express();
 
   app.use(express.json());
