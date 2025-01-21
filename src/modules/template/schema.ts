@@ -4,8 +4,8 @@ import type { Template } from '@/database';
 type Record = Template;
 const schema = z.object({
   id: z.coerce.number().int().positive(),
-  title: z.string().min(1).max(500),
-  text: z.string().min(1).max(100000),
+  title: z.string().min(1).max(100),
+  text: z.string().min(1).max(2000),
 });
 
 const insertable = schema.omit({
