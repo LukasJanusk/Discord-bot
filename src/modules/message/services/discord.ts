@@ -11,7 +11,12 @@ export default async function createDiscordBot(
   channelId: string,
 ): Promise<DiscordBot> {
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.DirectMessages,
+    ],
   });
 
   await client.login(token);
