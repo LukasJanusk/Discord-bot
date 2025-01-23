@@ -10,7 +10,16 @@ export type Generated<T> =
     ? ColumnType<S, I | undefined, U>
     : ColumnType<T, T | undefined, T>;
 
+export interface Gif {
+  height: number;
+  id: Generated<number>;
+  idInApi: number;
+  url: string;
+  width: number;
+}
+
 export interface Message {
+  gifId: number | null;
   id: Generated<number>;
   sentAt: string;
   sprintId: number;
@@ -35,6 +44,7 @@ export interface User {
 }
 
 export interface DB {
+  gif: Gif;
   message: Message;
   sprint: Sprint;
   template: Template;
