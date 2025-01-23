@@ -5,7 +5,7 @@ import createDatabase from './database';
 const PORT = 3000;
 
 const database = createDatabase(DATABASE_URL);
-const app = createApp(database);
+const app = await createApp(database);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line

@@ -29,7 +29,7 @@ export interface Message {
 
 export interface Sprint {
   id: Generated<number>;
-  name: string;
+  sprintCode: string;
 }
 
 export interface Template {
