@@ -29,8 +29,8 @@ export default async (db: Database) => {
         // send back created message body
         const { username, sprintCode } = schema.parseRequestObject(req.body);
         // const messageBody = messages.create(body);
-        const gif = await giphyApi.fetchGIF('congratulations');
-        const sent = await bot.sendToChannel(`test`, gif || undefined);
+        const gif = await giphyApi.fetchGIF('success');
+        const sent = await bot.sendToChannel(`${sprintCode}`, gif || undefined);
         return sent;
       }, StatusCodes.CREATED),
     );

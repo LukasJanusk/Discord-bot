@@ -25,20 +25,15 @@ export default (): GifAPI => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
-        const parsedGif = parseGifData(data as GiphyApiResponse);
-        if (parsedGif) {
-          return parsedGif;
-        }
-        throw new Error('Failed to parse gif');
-      } else {
-        throw new Error(`Failed to fetch GIF: ${response.statusText}`);
+        return parseGifData(data as GiphyApiResponse);
       }
+      throw new Error(`Failed to fetch GIF: ${response.statusText}`);
     } catch (error) {
       // eslint-disable-next-line
       console.error(
         error instanceof Error
-          ? `Error fetching API occured: ${error.message}`
-          : ` Unknown error Occured`,
+          ? `GIF API error: ${error.message}`
+          : `GIF API error: unknown error occured`,
       );
       return null;
     }
@@ -51,14 +46,9 @@ export default (): GifAPI => {
       const data = (await response.json()) as GiphyApiResponse;
 
       if (response.ok) {
-        const parsedGif = parseGifData(data);
-        if (parsedGif) {
-          return parsedGif;
-        }
-        throw new Error('Failed to parse gif');
-      } else {
-        throw new Error(`Failed to fetch GIF by ID: ${response.statusText}`);
+        return parseGifData(data);
       }
+      throw new Error(`Failed to fetch GIF by ID: ${response.statusText}`);
     } catch (error) {
       // eslint-disable-next-line
       console.error(
