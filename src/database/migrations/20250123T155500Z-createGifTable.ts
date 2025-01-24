@@ -5,9 +5,9 @@ export async function up(db: Kysely<SqliteDatabase>) {
     .createTable('gif')
     .addColumn('id', 'integer', (c) => c.primaryKey().autoIncrement().notNull())
     .addColumn('url', 'text', (c) => c.notNull())
-    .addColumn('id_in_api', 'integer', (c) => c.notNull())
-    .addColumn('width', 'integer', (c) => c.notNull())
-    .addColumn('height', 'integer', (c) => c.notNull())
+    .addColumn('width', 'integer')
+    .addColumn('height', 'integer')
+    .addColumn('api_id', 'text')
     .execute();
 
   await db.schema

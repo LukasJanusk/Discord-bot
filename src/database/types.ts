@@ -11,11 +11,11 @@ export type Generated<T> =
     : ColumnType<T, T | undefined, T>;
 
 export interface Gif {
-  height: number;
+  apiId: string | null;
+  height: number | null;
   id: Generated<number>;
-  idInApi: number;
   url: string;
-  width: number;
+  width: number | null;
 }
 
 export interface Message {
@@ -39,8 +39,8 @@ export interface Template {
 }
 
 export interface User {
-  discordName: string;
   id: Generated<number>;
+  username: string;
 }
 
 export interface DB {

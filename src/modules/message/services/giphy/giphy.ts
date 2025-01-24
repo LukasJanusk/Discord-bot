@@ -1,5 +1,5 @@
 import { GIPHY_API_KEY } from 'config';
-import { parseGifData, GiphyApiResponse, ParsedGif } from './parser';
+import { parseGifData, GiphyApiResponse, ParsedGif } from './schema';
 
 export interface GifAPI {
   /**

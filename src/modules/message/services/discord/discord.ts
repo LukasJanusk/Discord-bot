@@ -6,7 +6,11 @@ import {
   Message,
   EmbedBuilder,
 } from 'discord.js';
-import { ParsedGif } from './parser';
+import * as fs from 'fs';
+import * as path from 'path';
+import { getCurrentDir } from '@/utils/directory';
+import { ParsedGif } from '../giphy/schema';
+import { UserNotFound } from '../../errors';
 
 export interface DiscordBot {
   client: Client;
@@ -21,8 +25,8 @@ export interface DiscordBot {
    */
   sendToChannel: (
     message: string,
+    userName: string,
     gifImage?: ParsedGif,
-    userName?: string,
   ) => Promise<Message<true>>;
 
   /**
@@ -40,6 +44,38 @@ export interface DiscordBot {
   ) => Promise<Message<false>>;
 }
 
+// Function to build the embed
+const buildEmbed = (gifImage?: ParsedGif) => {
+  if (!gifImage) return null;
+
+  return new EmbedBuilder()
+    .setTitle('Congratulations!')
+    .setImage(gifImage.url)
+    .setDescription(`Dimensions: ${gifImage.width} x ${gifImage.height}`);
+};
+
+// Function to create an attachment (with local gif fallback)
+const createAttachment = (gifImage?: ParsedGif) => {
+  const attachments = [];
+  if (!gifImage) {
+    const randomNumber = Math.floor(Math.random() * 4) + 1;
+    const currentDir = getCurrentDir(import.meta.url);
+    const localGifPath = path.resolve(
+      currentDir,
+      `./assets/${randomNumber}.gif`,
+    );
+    if (fs.existsSync(localGifPath)) {
+      attachments.push({
+        attachment: localGifPath,
+        name: 'congratulation.gif',
+        title: 'Congratulations!',
+      });
+    }
+  }
+
+  return attachments;
+};
+
 export default async function createDiscordBot(
   token: string,
   channelId: string,
@@ -48,6 +84,7 @@ export default async function createDiscordBot(
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.GuildMembers,
       GatewayIntentBits.MessageContent,
       GatewayIntentBits.DirectMessages,
     ],
@@ -68,8 +105,8 @@ export default async function createDiscordBot(
 
   const sendToChannel = async (
     message: string,
+    userName: string,
     gifImage?: ParsedGif,
-    userName?: string,
   ) => {
     const channel = client.channels.cache.get(channelId);
     if (!channel) {
@@ -87,24 +124,20 @@ export default async function createDiscordBot(
         const user = members.find(
           (member) => member.user.username === userName,
         );
+        console.log(user);
         if (user) {
           formattedMessage = `<@${user.id}> ${message}`;
         } else {
-          console.warn(`User with username ${userName} not found.`);
+          throw new UserNotFound();
         }
       }
-      const embed = gifImage
-        ? new EmbedBuilder()
-            .setTitle('Congratulations!')
-            .setImage(gifImage.gifUrl)
-            .setDescription(
-              `Dimensions: ${gifImage.width} x ${gifImage.height}`,
-            )
-        : null;
+      const embed = buildEmbed(gifImage);
+      const attachments = createAttachment(gifImage);
 
       const sent = await channel.send({
         content: formattedMessage,
         embeds: embed ? [embed] : [],
+        files: attachments,
       });
 
       return sent;
@@ -129,17 +162,12 @@ export default async function createDiscordBot(
         throw new Error('User not found');
       }
 
-      const embed = gifImage
-        ? new EmbedBuilder()
-            .setTitle('Congratulations!')
-            .setImage(gifImage.gifUrl)
-            .setDescription(
-              `Dimensions: ${gifImage.width} x ${gifImage.height}`,
-            )
-        : null;
+      const embed = buildEmbed(gifImage);
+      const attachments = createAttachment(gifImage);
       const sent = await user.send({
         content: message,
         embeds: embed ? [embed] : [],
+        files: attachments.length > 0 ? attachments : [],
       });
 
       return sent;

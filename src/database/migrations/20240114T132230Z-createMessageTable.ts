@@ -4,7 +4,7 @@ export async function up(db: Kysely<SqliteDatabase>) {
   await db.schema
     .createTable('user')
     .addColumn('id', 'integer', (c) => c.primaryKey().autoIncrement().notNull())
-    .addColumn('discord_name', 'text', (c) => c.notNull())
+    .addColumn('username', 'text', (c) => c.notNull())
     .execute();
   await db.schema
     .createTable('sprint')
