@@ -3,11 +3,15 @@ import createTestDatabase from '@tests/utils/createTestDatabase';
 import { createFor } from '@tests/utils/records';
 import { describe, it, expect, afterEach, afterAll } from 'vitest';
 import supertest from 'supertest';
+import createDiscordBot from '@tests/utils/createDiscordBot';
+import createGiphyApi from '@/modules/message/services/giphy';
 import createApp from '@/app';
 import { fakeTemplate, templateMatcher } from './utils';
 
 const db = await createTestDatabase();
-const app = await createApp(db);
+const fakeDiscordBot = createDiscordBot();
+const fakeGifApi = createGiphyApi('fake_key');
+const app = createApp(db, fakeDiscordBot, fakeGifApi);
 
 const createTemplates = createFor(db, 'template');
 
