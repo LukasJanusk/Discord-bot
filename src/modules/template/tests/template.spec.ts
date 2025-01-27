@@ -7,7 +7,7 @@ import createApp from '@/app';
 import { fakeTemplate, templateMatcher } from './utils';
 
 const db = await createTestDatabase();
-const app = createApp(db);
+const app = await createApp(db);
 
 const createTemplates = createFor(db, 'template');
 
