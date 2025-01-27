@@ -5,7 +5,7 @@ import { sprintCodeRegex } from '@/utils/regex';
 type Record = Sprint;
 
 const schema = z.object({
-  id: z.number().int(),
+  id: z.coerce.number().int().positive(),
   sprintCode: z.string().regex(sprintCodeRegex, {
     message:
       'Invalid sprintCode format. Must match one of: WD-#, DS-#, DA-#, DM-#',

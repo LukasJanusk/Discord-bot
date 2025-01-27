@@ -6,8 +6,3 @@ export class SprintNotFound extends NotFound {
     super(message);
   }
 }
-export class MessageCreationFailed extends Error {
-  constructor(message = 'Message creation failed') {
-    super(message);
-  }
-}

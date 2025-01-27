@@ -158,7 +158,7 @@ describe('DELETE', () => {
 
     expect(body).toEqual(templateMatcher({ id: 333 }));
   });
-  it('returns 404 not found when id not found in db is privided', async () => {
+  it('returns 404 not found when id not found in db is provided', async () => {
     const { body } = await supertest(app).delete('/templates/123').expect(404);
 
     expect(body.error.message).toMatch(/not found/i);
