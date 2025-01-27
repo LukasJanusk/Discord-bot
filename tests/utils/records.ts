@@ -30,7 +30,6 @@ export const selectAllFor =
     const query = db.selectFrom(tableName).selectAll();
 
     return expression
-      ? // shortcut which works as long as there are no table aliases
-        query.where(expression as any).execute()
+      ? query.where(expression as any).execute()
       : query.execute();
   };
