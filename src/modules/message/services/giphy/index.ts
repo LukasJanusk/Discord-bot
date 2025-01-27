@@ -1,4 +1,3 @@
-import { GIPHY_API_KEY } from 'config';
 import { parseGifData, GiphyApiResponse, ParsedGif } from './schema';
 
 export interface GifAPI {
@@ -18,10 +17,10 @@ export interface GifAPI {
   fetchGifById(id: string): Promise<ParsedGif | null>;
 }
 
-export default (): GifAPI => {
+export default (API_KEY: string): GifAPI => {
   const fetchGIF = async (tag: string) => {
     try {
-      const url = `https://api.giphy.com/v1/gifs/random?api_key=${GIPHY_API_KEY}&tag=${tag}&lang=en`;
+      const url = `https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}&tag=${tag}&lang=en`;
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
@@ -41,7 +40,7 @@ export default (): GifAPI => {
 
   const fetchGifById = async (id: string): Promise<ParsedGif | null> => {
     try {
-      const url = `https://api.giphy.com/v1/gifs/${id}?api_key=${GIPHY_API_KEY}`;
+      const url = `https://api.giphy.com/v1/gifs/${id}?api_key=${API_KEY}`;
       const response = await fetch(url);
       const data = (await response.json()) as GiphyApiResponse;
 

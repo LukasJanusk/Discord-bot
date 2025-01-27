@@ -3,8 +3,8 @@ import {
   Client,
   GatewayIntentBits,
   TextChannel,
-  Message,
   EmbedBuilder,
+  GuildMember,
 } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,7 +14,6 @@ import { UserNotFound } from '../../errors';
 
 export interface DiscordBot {
   client: Client;
-
   /**
    * Sends a message to a guild text channel.
    * @param message - The message content to send.
@@ -27,8 +26,7 @@ export interface DiscordBot {
     message: string,
     userName: string,
     gifImage?: ParsedGif,
-  ) => Promise<Message<true>>;
-
+  ) => Promise<boolean>;
   /**
    * Sends a direct message to a user.
    * @param userId - The Discord ID of the recipient.
@@ -41,45 +39,10 @@ export interface DiscordBot {
     userId: string,
     message: string,
     gifImage?: ParsedGif,
-  ) => Promise<Message<false>>;
+  ) => Promise<boolean>;
 }
 
-// Function to build the embed
-const buildEmbed = (gifImage?: ParsedGif) => {
-  if (!gifImage) return null;
-
-  return new EmbedBuilder()
-    .setTitle('Congratulations!')
-    .setImage(gifImage.url)
-    .setDescription(`Dimensions: ${gifImage.width} x ${gifImage.height}`);
-};
-
-// Function to create an attachment (with local gif fallback)
-const createAttachment = (gifImage?: ParsedGif) => {
-  const attachments = [];
-  if (!gifImage) {
-    const randomNumber = Math.floor(Math.random() * 4) + 1;
-    const currentDir = getCurrentDir(import.meta.url);
-    const localGifPath = path.resolve(
-      currentDir,
-      `./assets/${randomNumber}.gif`,
-    );
-    if (fs.existsSync(localGifPath)) {
-      attachments.push({
-        attachment: localGifPath,
-        name: 'congratulation.gif',
-        title: 'Congratulations!',
-      });
-    }
-  }
-
-  return attachments;
-};
-
-export default async function createDiscordBot(
-  token: string,
-  channelId: string,
-): Promise<DiscordBot> {
+const setupClient = async (token: string): Promise<Client> => {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -103,50 +66,99 @@ export default async function createDiscordBot(
     });
   });
 
+  return client;
+};
+
+export const findMember = async (
+  channel: TextChannel,
+  userName: string,
+): Promise<GuildMember> => {
+  const members = await channel.guild.members.fetch();
+  const user = members.find((member) => member.user.username === userName);
+
+  if (!user) {
+    throw new UserNotFound();
+  }
+
+  return user;
+};
+
+export const formatMessage = async (
+  channel: TextChannel,
+  message: string,
+  userName?: string,
+): Promise<string> => {
+  if (userName) {
+    const user = await findMember(channel, userName);
+    return `<@${user.id}> ${message}`;
+  }
+  return message;
+};
+
+export const buildEmbed = (gifImage?: ParsedGif) => {
+  if (!gifImage) return null;
+
+  return new EmbedBuilder()
+    .setTitle('Congratulations!')
+    .setImage(gifImage.url)
+    .setDescription(`Dimensions: ${gifImage.width} x ${gifImage.height}`);
+};
+
+export const createAttachment = (gifImage?: ParsedGif) => {
+  const attachments = [];
+  if (!gifImage) {
+    const randomNumber = Math.floor(Math.random() * 4) + 1;
+    const currentDir = getCurrentDir(import.meta.url);
+    const localGifPath = path.resolve(
+      currentDir,
+      `./assets/${randomNumber}.gif`,
+    );
+    if (fs.existsSync(localGifPath)) {
+      attachments.push({
+        attachment: localGifPath,
+        name: 'congratulation.gif',
+        title: 'Congratulations!',
+      });
+    }
+  }
+  return attachments;
+};
+
+export default async function createDiscordBot(
+  token: string,
+  channelId: string,
+): Promise<DiscordBot> {
+  const client = await setupClient(token);
+
   const sendToChannel = async (
     message: string,
     userName: string,
     gifImage?: ParsedGif,
   ) => {
     const channel = client.channels.cache.get(channelId);
-    if (!channel) {
-      console.error('Channel not found');
-      throw new Error('Channel not found');
-    }
-    if (!(channel instanceof TextChannel)) {
-      throw new Error('The channel is not a text-based channel');
+    if (!channel || !(channel instanceof TextChannel)) {
+      console.error('Invalid or non-existent text channel');
+      return false;
     }
 
     try {
-      let formattedMessage = message;
-      if (userName) {
-        const members = await channel.guild.members.fetch();
-        const user = members.find(
-          (member) => member.user.username === userName,
-        );
-        console.log(user);
-        if (user) {
-          formattedMessage = `<@${user.id}> ${message}`;
-        } else {
-          throw new UserNotFound();
-        }
-      }
+      const formattedMessage = await formatMessage(channel, message, userName);
       const embed = buildEmbed(gifImage);
       const attachments = createAttachment(gifImage);
 
-      const sent = await channel.send({
+      await channel.send({
         content: formattedMessage,
         embeds: embed ? [embed] : [],
         files: attachments,
       });
-
-      return sent;
+      return true;
     } catch (error) {
-      throw new Error(
+      console.error(
         error instanceof Error
           ? error.message
-          : 'Failed send Channel message: Unknown error',
+          : 'Failed to send message to channel',
       );
+      return false;
     }
   };
 
@@ -159,30 +171,24 @@ export default async function createDiscordBot(
       const user = await client.users.fetch(userId);
       if (!user) {
         console.error('User not found');
-        throw new Error('User not found');
+        return false;
       }
 
       const embed = buildEmbed(gifImage);
       const attachments = createAttachment(gifImage);
-      const sent = await user.send({
+      await user.send({
         content: message,
         embeds: embed ? [embed] : [],
         files: attachments.length > 0 ? attachments : [],
       });
-
-      return sent;
+      return true;
     } catch (error) {
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Failed send DM: Unknown error',
+      console.error(
+        error instanceof Error ? error.message : 'Failed to send DM',
       );
+      return false;
     }
   };
 
-  return {
-    sendToChannel,
-    sendDM,
-    client,
-  };
+  return { sendToChannel, sendDM, client };
 }

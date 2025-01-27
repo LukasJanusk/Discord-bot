@@ -12,3 +12,8 @@ export class UserNotFound extends NotFound {
     super(message);
   }
 }
+export class MessageCreationFailed extends Error {
+  constructor(message = 'Message creation failed') {
+    super(message);
+  }
+}

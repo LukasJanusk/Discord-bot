@@ -1,24 +1,21 @@
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { DISCORD_BOT_TOKEN, CHANNEL_ID } from 'config';
 import { Database } from '@/database';
 import { jsonRoute } from '@/utils/middleware';
 import buildRepository from './repository';
 import buildRepositoryTemplates from '../template/repository';
-import createDiscordBot from './services/discord/discord';
-import createGiphyApi from './services/giphy/giphy';
 import * as schema from './schema';
-import { MessageCreationFailed, SprintNotFound } from '../sprint/errors';
-import { MessageNotFound, UserNotFound } from './errors';
+import { SprintNotFound } from '../sprint/errors';
+import { MessageNotFound, UserNotFound, MessageCreationFailed } from './errors';
 import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
+import { DiscordBot } from './services/discord';
+import { GifAPI } from './services/giphy';
 
-export default async (db: Database) => {
+export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
   const router = Router();
   const messages = buildRepository(db);
   const templates = buildRepositoryTemplates(db);
-  const giphyApi = createGiphyApi();
-  const discordBot = await createDiscordBot(DISCORD_BOT_TOKEN, CHANNEL_ID);
 
   router
     .route('/')
@@ -32,7 +29,7 @@ export default async (db: Database) => {
         }
         const user = await messages.createUser({ username });
         if (!user) throw new UserNotFound();
-        const gif = await giphyApi.fetchGIF('success');
+        const gif = await gifApi.fetchGIF('success');
         const allTemplates = await templates.findAll();
         if (allTemplates.length < 1) {
           throw new TemplateNotFound();
