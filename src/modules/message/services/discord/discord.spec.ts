@@ -53,3 +53,8 @@ it('sends tagged message when user name is provided', async () => {
   // Act
   // Assert
 });
+it('fetches fallback gif if ParsedGif is not provided', async () => {
+  // Arrange
+  // Act
+  // Assert
+});

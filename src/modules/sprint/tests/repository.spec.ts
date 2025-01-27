@@ -35,8 +35,8 @@ describe('create', () => {
 
     expect(sprint).toEqual(sprintMatcher());
 
-    const templateInDatabase = await selectSprints();
-    expect(templateInDatabase).toEqual([sprint]);
+    const sprintInDatabase = await selectSprints();
+    expect(sprintInDatabase).toEqual([sprint]);
   });
 });
 
@@ -68,9 +68,9 @@ describe('findById', () => {
       }),
     );
 
-    const foundTemplate = await repository.findById(sprint!.id);
+    const foundSprint = await repository.findById(sprint!.id);
 
-    expect(foundTemplate).toEqual(sprintMatcher());
+    expect(foundSprint).toEqual(sprintMatcher());
   });
 
   it('should return undefined if sprint is not found', async () => {
@@ -112,15 +112,15 @@ describe('update', () => {
 });
 
 describe('remove', () => {
-  it('should remove an template', async () => {
+  it('should remove an sprint', async () => {
     const [sprint] = await createSprints(fakeSprint());
 
-    const removedTemplate = await repository.remove(sprint.id);
+    const removedSprint = await repository.remove(sprint.id);
 
-    expect(removedTemplate).toEqual(sprintMatcher());
+    expect(removedSprint).toEqual(sprintMatcher());
   });
 
-  it('should return undefined if template is not found', async () => {
+  it('should return undefined if sprint is not found', async () => {
     const notFoundSprint = await repository.remove(999);
 
     expect(notFoundSprint).toBeUndefined();

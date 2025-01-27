@@ -1,4 +1,4 @@
-import { parseGifData, GiphyApiResponse, ParsedGif } from './schema';
+import { parseGifData, GiphyApiResponse, parseGif, ParsedGif } from './schema';
 
 export interface GifAPI {
   /**
@@ -16,17 +16,24 @@ export interface GifAPI {
    */
   fetchGifById(id: string): Promise<ParsedGif | null>;
 }
+export const getResponse = async (url: string): Promise<Response> => {
+  const response = await fetch(url);
+  if (response.ok) {
+    return response;
+  }
+  throw new Error(
+    `Failed to fetch GIF: ${response.statusText} (Status Code: ${response.status})`,
+  );
+};
 
 export default (API_KEY: string): GifAPI => {
-  const fetchGIF = async (tag: string) => {
+  const fetchGIF = async (tag: string): Promise<ParsedGif | null> => {
     try {
       const url = `https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}&tag=${tag}&lang=en`;
-      const response = await fetch(url);
+      const response = await getResponse(url);
       const data = await response.json();
-      if (response.ok) {
-        return parseGifData(data as GiphyApiResponse);
-      }
-      throw new Error(`Failed to fetch GIF: ${response.statusText}`);
+      const parsedResponse = parseGifData(data as GiphyApiResponse);
+      return parseGif(parsedResponse);
     } catch (error) {
       // eslint-disable-next-line
       console.error(
@@ -42,10 +49,10 @@ export default (API_KEY: string): GifAPI => {
     try {
       const url = `https://api.giphy.com/v1/gifs/${id}?api_key=${API_KEY}`;
       const response = await fetch(url);
-      const data = (await response.json()) as GiphyApiResponse;
-
       if (response.ok) {
-        return parseGifData(data);
+        const data = await response.json();
+        const parsedResponse = parseGifData(data as GiphyApiResponse);
+        return parseGif(parsedResponse);
       }
       throw new Error(`Failed to fetch GIF by ID: ${response.statusText}`);
     } catch (error) {
