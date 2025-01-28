@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Coverage`
+coverage/
+
 # Node.js dependencies
 node_modules/
 
