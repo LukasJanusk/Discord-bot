@@ -76,7 +76,7 @@ describe('parseRequestObject', () => {
     expect(() => parseRequestObject(emptySprintCode)).toThrow(/sprintCode/i);
   });
 
-  it.skip('rejects when username is missing/empty', () => {
+  it('rejects when username is missing/empty', () => {
     const noUsername = omit(fakeRequestObject(), 'username');
     const emptyUsername = { username: '', sprintCode: 'WD-1.1' };
 

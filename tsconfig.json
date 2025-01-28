@@ -6,6 +6,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
+    "types": ["vitest/globals"],
 
     "module": "ESNext",
     "target": "ESNext",

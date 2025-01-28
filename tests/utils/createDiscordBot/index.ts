@@ -17,17 +17,5 @@ export default (): DiscordBot => {
     return true;
   };
 
-  const sendDM = async (
-    userId: string,
-    message: string,
-    gifImage?: ParsedGif,
-  ): Promise<boolean> => {
-    console.log('sendDM called with userId:', userId);
-    console.log('message:', message);
-    console.log('gifImage:', gifImage);
-
-    return true;
-  };
-
-  return { client, sendToChannel, sendDM };
+  return { client, sendToChannel };
 };

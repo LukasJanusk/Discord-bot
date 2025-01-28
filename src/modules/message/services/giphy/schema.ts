@@ -5,10 +5,19 @@ type Record = Gif;
 
 const schema = z.object({
   id: z.coerce.number().int().positive(),
-  apiId: z.string(),
+  apiId: z.preprocess(
+    (val) => (val == null ? null : val),
+    z.string().nullable(),
+  ),
   url: z.string(),
-  width: z.string().transform((val) => parseInt(val, 10)),
-  height: z.string().transform((val) => parseInt(val, 10)),
+  width: z.preprocess(
+    (val) => (val == null ? null : val),
+    z.coerce.number().nullable(),
+  ),
+  height: z.preprocess(
+    (val) => (val == null ? null : val),
+    z.coerce.number().nullable(),
+  ),
 });
 
 const GifImageSchema = z.object({
@@ -26,12 +35,6 @@ const GiphyApiResponseSchema = z.object({
   }),
 });
 
-const parsedGifSchema = schema.omit({ id: true });
-
-export type GifImage = z.infer<typeof GifImageSchema>;
-export type GiphyApiResponse = z.infer<typeof GiphyApiResponseSchema>;
-export type ParsedGif = z.infer<typeof parsedGifSchema>;
-
 /**
  * Parses the Giphy API response to extract relevant GIF data.
  * @param data - The Giphy API response data.
@@ -45,6 +48,17 @@ export const parseGifData = (data: unknown) => {
   }
 };
 
+const parsedGifSchema = schema.omit({ id: true }).transform((data) => ({
+  apiId: data.apiId ?? null,
+  url: data.url ?? '',
+  width: data.width ?? null,
+  height: data.height ?? null,
+}));
+
+export type GifImage = z.infer<typeof GifImageSchema>;
+export type GiphyApiResponse = z.infer<typeof GiphyApiResponseSchema>;
+export type ParsedGif = z.infer<typeof parsedGifSchema>;
+
 export const parseGif = (record: GiphyApiResponse): ParsedGif => {
   const { id, images } = record.data;
 
@@ -57,13 +71,8 @@ export const parseGif = (record: GiphyApiResponse): ParsedGif => {
   return parsedGifSchema.parse(gifData);
 };
 
-const insertable = parsedGifSchema.partial({
-  apiId: true,
-  width: true,
-  height: true,
-});
-
-export const parseInsertable = (record: unknown) => insertable.parse(record);
+export const parseInsertable = (record: unknown) =>
+  parsedGifSchema.parse(record);
 
 export const keys: (keyof Record)[] = Object.keys(
   schema.shape,

@@ -14,7 +14,7 @@ type Row = Gif;
 type RowWithoutId = Omit<Row, 'id'>;
 type RowInsert = Insertable<RowWithoutId>;
 type RowUpdate = Updateable<RowWithoutId>;
-type RowSelect = Selectable<Row>;
+export type RowSelect = Selectable<Row>;
 
 export default (db: Database) => ({
   findAll(): Promise<RowSelect[]> {

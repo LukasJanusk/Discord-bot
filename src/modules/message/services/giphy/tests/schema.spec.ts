@@ -1,6 +1,6 @@
 import { it, expect, describe } from 'vitest';
 import { omit } from 'lodash';
-import { parseGifData, parseGif } from '../schema';
+import { parseGifData, parseGif, parseInsertable } from '../schema';
 import {
   mockApiResponse,
   mockBadApiResponse,
@@ -28,5 +28,32 @@ describe('parse Api response to ParsedGif', () => {
     const parsed = parseGif(parsedResponseData);
 
     expect(parsed).toEqual(parsedGif);
+  });
+});
+describe('parseInsertable', () => {
+  it('parses when null values in data', () => {
+    const record = {
+      apiId: 'id123',
+      url: 'url.example.com',
+      height: null,
+      width: null,
+    };
+    expect(parseInsertable(record)).toEqual({
+      apiId: 'id123',
+      url: 'url.example.com',
+      height: null,
+      width: null,
+    });
+  });
+  it('parses when missing values in data', () => {
+    const record = {
+      url: 'url.example.com',
+    };
+    expect(parseInsertable(record)).toEqual({
+      apiId: null,
+      url: 'url.example.com',
+      height: null,
+      width: null,
+    });
   });
 });

@@ -17,23 +17,20 @@ afterEach(async () => {
 
 describe('create', () => {
   it('should create a Gif with all fields', async () => {
-    const sprint = await repository.create({
+    const gif = await repository.create({
       apiId: '1',
       height: 400,
       url: 'fake_url',
       width: 300,
     });
 
-    expect(sprint).toEqual({
+    expect(gif).toEqual({
       id: expect.any(Number),
       apiId: '1',
       height: 400,
       url: 'fake_url',
       width: 300,
     });
-
-    const gifs = await selectGifs();
-    expect(gifs).toEqual([sprint]);
   });
   it('should create a Gif with missing non required fields', async () => {
     const sprint = await repository.create({

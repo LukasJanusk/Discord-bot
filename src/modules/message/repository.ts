@@ -3,7 +3,6 @@ import type {
   Insertable,
   Selectable,
   SqlBool,
-  Updateable,
 } from 'kysely';
 import { keys } from './schema';
 import type { User, Sprint, Message, Database, DB } from '@/database';
@@ -20,7 +19,6 @@ type RowUserInsert = Insertable<RowUserWithoutId>;
 type RowUserSelect = Selectable<RowUser>;
 type RowWithoutId = Omit<Row, 'id'>;
 type RowInsert = Insertable<RowWithoutId>;
-type RowUpdate = Updateable<RowWithoutId>;
 type RowSelect = Selectable<Row>;
 type RowSprintSelect = Selectable<RowSprint>;
 
@@ -42,11 +40,19 @@ export default (db: Database) => ({
       .where('id', '=', id)
       .executeTakeFirst();
   },
-  findBySprint(sprintCode: string): Promise<RowSelect[] | undefined> {
+  findBySprint(sprintCode: string): Promise<RowSelect[]> {
     return db
       .selectFrom(TABLE)
-      .select(keys)
       .innerJoin(SPRINT, `${TABLE}.sprintId`, `${SPRINT}.id`)
+      .select([
+        `${TABLE}.id`,
+        `${TABLE}.gifId`,
+        `${TABLE}.sentAt`,
+        `${TABLE}.sprintId`,
+        `${TABLE}.templateId`,
+        `${TABLE}.userId`,
+      ])
+
       .where(`${SPRINT}.sprintCode`, '=', sprintCode)
       .execute();
   },
@@ -54,14 +60,21 @@ export default (db: Database) => ({
     return db
       .selectFrom(SPRINT)
       .selectAll()
-      .where('sprintCode', '=', sprintCode)
+      .where(`${SPRINT}.sprintCode`, '=', sprintCode)
       .executeTakeFirst();
   },
-  findByUsername(username: string): Promise<RowSelect[] | undefined> {
+  findByUsername(username: string): Promise<RowSelect[]> {
     return db
       .selectFrom(TABLE)
-      .select(keys)
       .innerJoin(USER, `${TABLE}.userId`, `${USER}.id`)
+      .select([
+        `${TABLE}.id`,
+        `${TABLE}.gifId`,
+        `${TABLE}.sentAt`,
+        `${TABLE}.sprintId`,
+        `${TABLE}.templateId`,
+        `${TABLE}.userId`,
+      ])
       .where(`${USER}.username`, '=', username)
       .execute();
   },
@@ -83,18 +96,6 @@ export default (db: Database) => ({
       return existingUser;
     }
     return db.insertInto(USER).values(record).returningAll().executeTakeFirst();
-  },
-
-  update(id: number, partial: RowUpdate): Promise<RowSelect | undefined> {
-    if (Object.keys(partial).length === 0) {
-      return this.findById(id);
-    }
-    return db
-      .updateTable(TABLE)
-      .set(partial)
-      .where('id', '=', id)
-      .returning(keys)
-      .executeTakeFirst();
   },
 
   remove(id: number) {
