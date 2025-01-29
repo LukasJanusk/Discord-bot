@@ -5,6 +5,7 @@ import {
   GuildMember,
   User,
   EmbedBuilder,
+  GatewayIntentBits,
 } from 'discord.js';
 import fs from 'fs';
 import {
@@ -62,6 +63,10 @@ describe('formatMessage', () => {
     const message = formatMessage('You did it!', mockUser);
     expect(message).toEqual('<@userId123> You did it!');
   });
+  it('returns original message if no user is provided', () => {
+    const message = formatMessage('You did it!');
+    expect(message).toEqual('You did it!');
+  });
 });
 describe('buildEmbed', () => {
   it('returns embed when FormatedGif is provided', () => {
@@ -100,7 +105,32 @@ describe('createAttachment', () => {
   });
 });
 describe('setupClient', async () => {
-  it.skip('succesfully returns created client', async () => {});
+  it.skip('succesfully returns created client', async () => {
+    vi.doMock('discord.js', () => ({
+      Client: vi.fn().mockImplementation(() => ({
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.GuildMembers,
+          GatewayIntentBits.MessageContent,
+          GatewayIntentBits.DirectMessages,
+        ],
+        login: vi.fn().mockResolvedValue('encrypted-token-string'),
+        once: vi.fn(),
+      })),
+      GatewayIntentBits: {
+        Guilds: 'GUILD',
+        GuildMessages: 'GUILD_MESSAGES',
+        GuildMembers: 'GUILD_MEMBERS',
+        MessageContent: 'MESSAGE_CONTENT',
+        DirectMessages: 'DIRECT_MESSAGES',
+      },
+    }));
+    const token = 'valid-token';
+    const client = await setupClient(token);
+
+    expect(client.login).toHaveBeenCalledWith(token);
+  });
   it('throws error when fails to create client', async () => {
     const fakeToken = 'fake_token';
     await expect(setupClient(fakeToken)).rejects.toThrow(

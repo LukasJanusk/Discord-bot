@@ -55,6 +55,7 @@ const parsedGifSchema = schema.omit({ id: true }).transform((data) => ({
   height: data.height ?? null,
 }));
 
+export type LocalGif = z.infer<typeof schema>;
 export type GifImage = z.infer<typeof GifImageSchema>;
 export type GiphyApiResponse = z.infer<typeof GiphyApiResponseSchema>;
 export type ParsedGif = z.infer<typeof parsedGifSchema>;
@@ -73,7 +74,7 @@ export const parseGif = (record: GiphyApiResponse): ParsedGif => {
 
 export const parseInsertable = (record: unknown) =>
   parsedGifSchema.parse(record);
-
+export const parseLocalGif = (record: unknown) => schema.parse(record);
 export const keys: (keyof Record)[] = Object.keys(
   schema.shape,
 ) as (keyof z.infer<typeof schema>)[];

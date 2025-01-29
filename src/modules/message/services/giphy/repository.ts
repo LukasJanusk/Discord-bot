@@ -1,15 +1,8 @@
-import type {
-  ExpressionOrFactory,
-  Insertable,
-  Selectable,
-  SqlBool,
-  Updateable,
-} from 'kysely';
+import type { Insertable, Selectable, Updateable } from 'kysely';
 import { keys } from './schema';
-import type { Database, DB, Gif } from '@/database';
+import type { Database, Gif } from '@/database';
 
 const TABLE = 'gif';
-type TableName = typeof TABLE;
 type Row = Gif;
 type RowWithoutId = Omit<Row, 'id'>;
 type RowInsert = Insertable<RowWithoutId>;
@@ -19,12 +12,6 @@ export type RowSelect = Selectable<Row>;
 export default (db: Database) => ({
   findAll(): Promise<RowSelect[]> {
     return db.selectFrom(TABLE).select(keys).execute();
-  },
-
-  find(
-    expression: ExpressionOrFactory<DB, TableName, SqlBool>,
-  ): Promise<RowSelect[]> {
-    return db.selectFrom(TABLE).select(keys).where(expression).execute();
   },
 
   findById(id: number): Promise<RowSelect | undefined> {

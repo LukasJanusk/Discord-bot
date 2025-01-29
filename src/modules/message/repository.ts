@@ -1,16 +1,11 @@
-import type {
-  ExpressionOrFactory,
-  Insertable,
-  Selectable,
-  SqlBool,
-} from 'kysely';
+import type { Insertable, Selectable } from 'kysely';
 import { keys } from './schema';
-import type { User, Sprint, Message, Database, DB } from '@/database';
+import type { User, Sprint, Message, Database } from '@/database';
 
 const TABLE = 'message';
 const SPRINT = 'sprint';
 const USER = 'user';
-type TableName = typeof TABLE;
+
 type Row = Message;
 type RowSprint = Sprint;
 type RowUser = User;
@@ -25,12 +20,6 @@ type RowSprintSelect = Selectable<RowSprint>;
 export default (db: Database) => ({
   findAll(): Promise<RowSelect[]> {
     return db.selectFrom(TABLE).select(keys).execute();
-  },
-
-  find(
-    expression: ExpressionOrFactory<DB, TableName, SqlBool>,
-  ): Promise<RowSelect[]> {
-    return db.selectFrom(TABLE).select(keys).where(expression).execute();
   },
 
   findById(id: number): Promise<RowSelect | undefined> {

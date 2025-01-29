@@ -12,12 +12,14 @@ import {
   MessageCreationFailed,
   UserCreationFailed,
   GifCreationFailed,
+  GifNotFound,
 } from './errors';
 import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
 import { DiscordBot } from './services/discord';
 import { GifAPI } from './services/giphy';
 import { getLocalGif } from './utils';
+import { parseInsertable as parseLocallyStoredGif } from './services/giphy/schema';
 
 export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
   const router = Router();
@@ -37,15 +39,23 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
         }
         const user = await messages.createUser({ username });
         if (!user) throw new UserCreationFailed();
-        const apiGif = await gifApi.fetchGIF('success');
+
         let gif;
+        let finalGifId = null;
+
+        const apiGif = await gifApi.fetchGIF('success');
         if (apiGif) {
-          gif = await gifs.create(apiGif);
-          if (!gif) {
+          const fullGif = await gifs.create(apiGif);
+          if (!fullGif) {
             throw new GifCreationFailed();
           }
+          gif = fullGif;
+          finalGifId = fullGif.id;
         } else {
-          gif = await getLocalGif(gifs.findAll);
+          const localGif = await getLocalGif(gifs.findAll);
+          if (!localGif) throw new GifNotFound();
+          gif = parseLocallyStoredGif(localGif);
+          finalGifId = localGif.id;
         }
         const allTemplates = await templates.findAll();
         if (allTemplates.length < 1) {
@@ -53,7 +63,7 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
         }
         const template = pickRandom(allTemplates);
         const sent = await discordBot.sendToChannel(
-          `${user.username} completed: ${sprintCode}, ${template.text}`,
+          ` completed: ${sprintCode}. ${template.text}`,
           username,
           gif,
         );
@@ -63,18 +73,19 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
             sprintId: sprintInDatabase.id,
             templateId: template.id,
             userId: user.id,
+            gifId: finalGifId,
           });
           if (message) return message;
         }
         throw new MessageCreationFailed();
       }, StatusCodes.CREATED),
     );
-  router.route('/:username').get(
+  router.route('/username/:username').get(
     jsonRoute(async (req) => {
       const username = schema.parseUser(req.params.username);
       const record = await messages.findByUsername(username);
 
-      if (!record) {
+      if (record.length < 1) {
         throw new MessageNotFound();
       }
 
@@ -82,17 +93,16 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
     }),
   );
 
-  router.route('/:sprint').get(
+  router.route('/sprint/:sprint').get(
     jsonRoute(async (req) => {
-      const sprintCode = schema.parseSprint(req.params.sprintCode);
+      const sprintCode = schema.parseSprint(req.params.sprint);
       const record = await messages.findBySprint(sprintCode);
 
-      if (!record) {
+      if (record.length < 1) {
         throw new MessageNotFound();
       }
       return record;
     }),
   );
-
   return router;
 };

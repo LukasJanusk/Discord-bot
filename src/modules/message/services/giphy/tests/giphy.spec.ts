@@ -36,6 +36,4 @@ describe('getResponse', () => {
       'Failed to fetch GIF: Unauthorized',
     );
   });
-
-  it.skip('returns response of status OK', async () => {});
 });

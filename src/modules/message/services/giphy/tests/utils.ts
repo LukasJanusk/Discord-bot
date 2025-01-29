@@ -19,11 +19,6 @@ export const gifMatcher = (overrides: Partial<Insertable<Gif>> = {}) => ({
   ...fakeGif(overrides),
 });
 
-export const fakeGifFull = (overrides: Partial<Insertable<Gif>> = {}) => ({
-  id: 2,
-  ...fakeGif(overrides),
-});
-
 export const mockApiResponse = {
   data: {
     id: '12345',
