@@ -9,13 +9,7 @@ export default (): DiscordBot => {
     message: string,
     userName: string,
     gifImage?: ParsedGif,
-  ): Promise<boolean> => {
-    console.log('sendToChannel called with message:', message);
-    console.log('userName:', userName);
-    console.log('gifImage:', gifImage);
-
-    return true;
-  };
+  ): Promise<boolean> => true;
 
   return { client, sendToChannel };
 };

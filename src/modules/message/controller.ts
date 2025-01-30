@@ -8,11 +8,11 @@ import buildRepositoryTemplates from '../template/repository';
 import * as schema from './schema';
 import { SprintNotFound } from '../sprint/errors';
 import {
-  MessageNotFound,
   MessageCreationFailed,
   UserCreationFailed,
   GifCreationFailed,
   GifNotFound,
+  DiscordBotError,
 } from './errors';
 import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
@@ -75,7 +75,8 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
             userId: user.id,
             gifId: finalGifId,
           });
-          if (message) return message;
+          if (!message) throw new DiscordBotError();
+          return message;
         }
         throw new MessageCreationFailed();
       }, StatusCodes.CREATED),
@@ -84,10 +85,6 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
     jsonRoute(async (req) => {
       const username = schema.parseUser(req.params.username);
       const record = await messages.findByUsername(username);
-
-      if (record.length < 1) {
-        throw new MessageNotFound();
-      }
 
       return record;
     }),
@@ -98,9 +95,6 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
       const sprintCode = schema.parseSprint(req.params.sprint);
       const record = await messages.findBySprint(sprintCode);
 
-      if (record.length < 1) {
-        throw new MessageNotFound();
-      }
       return record;
     }),
   );

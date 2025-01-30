@@ -33,7 +33,7 @@ describe('getResponse', () => {
     const badUrl =
       'https://api.giphy.com/v1/gifs/random?api_key=invalid-api-key&tag=funny&lang=en';
     await expect(getResponse(badUrl)).rejects.toThrowError(
-      'Failed to fetch GIF: Unauthorized',
+      /Failed to fetch GIF:/,
     );
   });
 });

@@ -20,7 +20,6 @@ export const setupClient = async (token: string): Promise<Client> => {
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildMembers,
       GatewayIntentBits.MessageContent,
-      GatewayIntentBits.DirectMessages,
     ],
   });
 
@@ -49,6 +48,13 @@ export const setupClient = async (token: string): Promise<Client> => {
   }
 };
 
+export const getChannel = (client: Client, channelId: string): TextChannel => {
+  const channel = client.channels.cache.get(channelId);
+  if (!channel || !(channel instanceof TextChannel)) {
+    throw new Error('Invalid or non-existent text channel');
+  }
+  return channel;
+};
 export const findMember = async (
   channel: TextChannel,
   userName: string,
@@ -76,10 +82,7 @@ export const formatMessage = (
 export const buildEmbed = (gifImage?: ParsedGif) => {
   if (!gifImage) return null;
 
-  return new EmbedBuilder()
-    .setTitle('Congratulations!')
-    .setImage(gifImage.url)
-    .setDescription(`Dimensions: ${gifImage.width} x ${gifImage.height}`);
+  return new EmbedBuilder().setTitle('Congratulations!').setImage(gifImage.url);
 };
 
 export const createAttachment = (gifImage?: ParsedGif) => {

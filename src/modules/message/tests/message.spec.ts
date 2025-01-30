@@ -135,12 +135,12 @@ describe('username/:username', async () => {
 
     expect(body).toEqual([messageMatcher(fakeMessage())]);
   });
-  it('thows message not found error when no messages match username', async () => {
+  it('returns an empty array when no messages found', async () => {
     const { body } = await supertest(app)
       .get(`/messages/username/fake_name`)
-      .expect(404);
+      .expect(200);
 
-    expect(body.error.message).toBe('Message not found');
+    expect(body).toEqual([]);
   });
 });
 describe('sprint/:sprint', async () => {
@@ -154,12 +154,12 @@ describe('sprint/:sprint', async () => {
     expect(body).toEqual([messageMatcher(fakeMessage())]);
   });
 
-  it('thows message not found error when messages not found', async () => {
+  it('returns an empty array when no messages found', async () => {
     const sprint = 'WD-1.1';
     const { body } = await supertest(app)
       .get(`/messages/sprint/${sprint}`)
-      .expect(404);
+      .expect(200);
 
-    expect(body.error.message).toBe('Message not found');
+    expect(body).toEqual([]);
   });
 });

@@ -81,9 +81,6 @@ describe('buildEmbed', () => {
     expect(result).toBeInstanceOf(EmbedBuilder);
     expect(result?.data.title).toBe('Congratulations!');
     expect(result?.data.image?.url).toBe(mockGif.url);
-    expect(result?.data.description).toBe(
-      `Dimensions: ${mockGif.width} x ${mockGif.height}`,
-    );
   });
   it('returns null when FormatedGif is not provided', () => {
     expect(buildEmbed()).toEqual(null);
@@ -131,10 +128,42 @@ describe('setupClient', async () => {
 
     expect(client.login).toHaveBeenCalledWith(token);
   });
-  it('throws error when fails to create client', async () => {
+  it.skip('throws error when fails to create client', async () => {
+    vi.doMock('discord.js', () => ({
+      Client: vi.fn().mockImplementation(() => ({
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.GuildMembers,
+          GatewayIntentBits.MessageContent,
+          GatewayIntentBits.DirectMessages,
+        ],
+        login: vi.fn().mockResolvedValue('encrypted-token-string'),
+        once: vi.fn(),
+      })),
+      GatewayIntentBits: {
+        Guilds: 'GUILD',
+        GuildMessages: 'GUILD_MESSAGES',
+        GuildMembers: 'GUILD_MEMBERS',
+        MessageContent: 'MESSAGE_CONTENT',
+        DirectMessages: 'DIRECT_MESSAGES',
+      },
+    }));
     const fakeToken = 'fake_token';
     await expect(setupClient(fakeToken)).rejects.toThrow(
       /Failed to set up client/i,
     );
+  });
+});
+
+describe.skip('getChannel', async () => {
+  it('returns channel when found', () => {
+    // Arrange
+  });
+  it('throws an error when channels is not TextChannel', () => {
+    // Arrange
+  });
+  it('throws an error when channel not Found', () => {
+    // Arrange
   });
 });

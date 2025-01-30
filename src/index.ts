@@ -3,7 +3,7 @@ import {
   DISCORD_BOT_TOKEN,
   CHANNEL_ID,
   GIPHY_API_KEY,
-} from 'config';
+} from '@/config';
 import createApp from './app';
 import createDatabase from './database';
 import createDiscordBot from './modules/message/services/discord';

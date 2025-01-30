@@ -1,13 +1,15 @@
 /* eslint-disable no-console */
-import { Client, TextChannel } from 'discord.js';
+import { Client } from 'discord.js';
 import {
   formatMessage,
   setupClient,
   createAttachment,
   buildEmbed,
   findMember,
+  getChannel,
 } from './utils';
 import { ParsedGif } from '../giphy/schema';
+import { UserNotFound } from '../../errors';
 
 export interface DiscordBot {
   client: Client;
@@ -36,13 +38,8 @@ export default async function createDiscordBot(
     message: string,
     userName: string,
     gifImage?: ParsedGif,
-  ) => {
-    const channel = client.channels.cache.get(channelId);
-    if (!channel || !(channel instanceof TextChannel)) {
-      console.error('Invalid or non-existent text channel');
-      return false;
-    }
-
+  ): Promise<boolean> => {
+    const channel = getChannel(client, channelId);
     try {
       const user = await findMember(channel, userName);
       const formattedMessage = formatMessage(message, user);
@@ -61,6 +58,7 @@ export default async function createDiscordBot(
           ? error.message
           : 'Failed to send message to channel',
       );
+      if (error instanceof UserNotFound) throw error;
       return false;
     }
   };

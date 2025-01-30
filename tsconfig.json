@@ -1,12 +1,12 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts"],
 
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
-    "types": ["vitest/globals"],
+    "types": ["vitest/globals", "node"],
 
     "module": "ESNext",
     "target": "ESNext",

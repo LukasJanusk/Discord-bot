@@ -1,12 +1,7 @@
 /* eslint-disable max-classes-per-file */
+import { StatusCodes } from 'http-status-codes';
 import NotFound from '@/utils/errors/NotFound';
 import DatabaseError from '@/utils/errors/DatabaseError';
-
-export class MessageNotFound extends NotFound {
-  constructor(message = 'Message not found') {
-    super(message);
-  }
-}
 
 export class UserNotFound extends NotFound {
   constructor(message = 'Username not found') {
@@ -34,5 +29,14 @@ export class UserCreationFailed extends DatabaseError {
 export class GifCreationFailed extends DatabaseError {
   constructor(message = 'Gif creation failed') {
     super(message);
+  }
+}
+
+export class DiscordBotError extends Error {
+  status: number;
+
+  constructor(message: string = 'An error occurred in the Discord Bot') {
+    super(message);
+    this.status = StatusCodes.BAD_GATEWAY;
   }
 }
