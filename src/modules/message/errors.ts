@@ -2,6 +2,7 @@
 import { StatusCodes } from 'http-status-codes';
 import NotFound from '@/utils/errors/NotFound';
 import DatabaseError from '@/utils/errors/DatabaseError';
+import MethodNotAllowed from '@/utils/errors/MethodNotAllowed';
 
 export class UserNotFound extends NotFound {
   constructor(message = 'Username not found') {
@@ -38,5 +39,23 @@ export class DiscordBotError extends Error {
   constructor(message: string = 'An error occurred in the Discord Bot') {
     super(message);
     this.status = StatusCodes.BAD_GATEWAY;
+  }
+}
+
+export class NotAllowedForSprint extends MethodNotAllowed {
+  constructor(message = 'Method not allowed for /messages/sprint/:sprint') {
+    super(message);
+  }
+}
+
+export class NotAllowedForUsername extends MethodNotAllowed {
+  constructor(message = 'Method not allowed for /messages/sprint/:username') {
+    super(message);
+  }
+}
+
+export class NotAllowedForMessage extends MethodNotAllowed {
+  constructor(message = 'Method not allowed for /messages') {
+    super(message);
   }
 }

@@ -13,6 +13,9 @@ import {
   GifCreationFailed,
   GifNotFound,
   DiscordBotError,
+  NotAllowedForSprint,
+  NotAllowedForUsername,
+  NotAllowedForMessage,
 } from './errors';
 import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
@@ -80,23 +83,42 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
         }
         throw new MessageCreationFailed();
       }, StatusCodes.CREATED),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForMessage();
+      }),
     );
-  router.route('/username/:username').get(
-    jsonRoute(async (req) => {
-      const username = schema.parseUser(req.params.username);
-      const record = await messages.findByUsername(username);
+  router
+    .route('/username/:username')
+    .get(
+      jsonRoute(async (req) => {
+        const username = schema.parseUser(req.params.username);
+        const record = await messages.findByUsername(username);
 
-      return record;
-    }),
-  );
+        return record;
+      }),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForUsername();
+      }),
+    );
 
-  router.route('/sprint/:sprint').get(
-    jsonRoute(async (req) => {
-      const sprintCode = schema.parseSprint(req.params.sprint);
-      const record = await messages.findBySprint(sprintCode);
+  router
+    .route('/sprint/:sprint')
+    .get(
+      jsonRoute(async (req) => {
+        const sprintCode = schema.parseSprint(req.params.sprint);
+        const record = await messages.findBySprint(sprintCode);
 
-      return record;
-    }),
-  );
+        return record;
+      }),
+    )
+    .all(
+      jsonRoute(() => {
+        throw new NotAllowedForSprint();
+      }),
+    );
   return router;
 };
