@@ -6,6 +6,7 @@ type Record = Sprint;
 
 const schema = z.object({
   id: z.coerce.number().int().positive(),
+  title: z.string().min(1).max(2000),
   sprintCode: z.string().regex(sprintCodeRegex, {
     message:
       'Invalid sprintCode format. Must match one of: WD-#, DS-#, DA-#, DM-#',
@@ -15,7 +16,7 @@ const schema = z.object({
 const insertable = schema.omit({
   id: true,
 });
-const updateable = insertable.partial({ sprintCode: true });
+const updateable = insertable.partial({ sprintCode: true, title: true });
 
 export const parse = (record: unknown) => schema.parse(record);
 export const parseId = (id: unknown) => schema.shape.id.parse(id);

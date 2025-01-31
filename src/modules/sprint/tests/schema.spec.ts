@@ -9,16 +9,32 @@ describe('parse', () => {
     expect(parse(record)).toEqual(record);
   });
   it('throws an error due to empty/missing sprintCode (concrete)', () => {
+    const sprintWithoutCode = {
+      id: 13,
+      title: 'someTitle',
+    };
+    const sprintEmptyCode = {
+      id: 13,
+      sprintCode: '',
+      title: 'someTitle',
+    };
+
+    expect(() => parse(sprintWithoutCode)).toThrow(/sprintCode/i);
+    expect(() => parse(sprintEmptyCode)).toThrow(/sprintCode/i);
+  });
+  it('throws an error due to empty/missing title (concrete)', () => {
     const sprintWithoutTitle = {
       id: 13,
+      sprintCode: 'WD-1.1',
     };
     const sprintEmptyTitle = {
       id: 13,
-      sprintCode: '',
+      sprintCode: 'WD-1.1',
+      title: '',
     };
 
-    expect(() => parse(sprintWithoutTitle)).toThrow(/sprintCode/i);
-    expect(() => parse(sprintEmptyTitle)).toThrow(/sprintCode/i);
+    expect(() => parse(sprintWithoutTitle)).toThrow(/title/i);
+    expect(() => parse(sprintEmptyTitle)).toThrow(/title/i);
   });
 });
 

@@ -16,14 +16,16 @@ afterEach(async () => {
 });
 
 describe('create', () => {
-  it('should create an sprint', async () => {
+  it('should create a sprint', async () => {
     const sprint = await repository.create({
       sprintCode: 'WD-1.1',
+      title: 'someTitle',
     });
 
     expect(sprint).toEqual({
       id: expect.any(Number),
       sprintCode: 'WD-1.1',
+      title: 'someTitle',
     });
 
     const sprintsInDatabase = await selectSprints();
@@ -44,10 +46,12 @@ describe('findAll', () => {
   it('should return all sprints', async () => {
     const sprint1 = await repository.create({
       sprintCode: 'WD-1.1',
+      title: 'someTitle',
     });
 
     const sprint2 = await repository.create({
       sprintCode: 'DS-2.3',
+      title: 'someTitle',
     });
 
     const sprints = await repository.findAll();

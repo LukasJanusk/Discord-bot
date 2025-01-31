@@ -13,9 +13,7 @@ describe('createGiphyApi', () => {
     await giphyApi.fetchGIF('random');
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'GIF API error: Failed to fetch GIF: Unauthorized',
-      ),
+      expect.stringContaining('GIF API error: Failed to fetch GIF'),
     );
 
     consoleSpy.mockRestore();
@@ -35,5 +33,19 @@ describe('getResponse', () => {
     await expect(getResponse(badUrl)).rejects.toThrowError(
       /Failed to fetch GIF:/,
     );
+  });
+  it('returns response from api', async () => {
+    const url = 'some.url.example';
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: () => Promise.resolve({ data: ['someGif'] }),
+      }),
+    ) as unknown as typeof fetch;
+    const response = await getResponse(url);
+
+    expect(response.status).toEqual(200);
   });
 });

@@ -66,6 +66,13 @@ describe('POST', () => {
       .expect(400);
     expect(body.error.message).toMatch(/sprintCode/i);
   });
+  it('should return 400 if title is missing', async () => {
+    const { body } = await supertest(app)
+      .post('/sprints')
+      .send(omit(['title'], fakeSprint({})))
+      .expect(400);
+    expect(body.error.message).toMatch(/title/i);
+  });
 
   it('does not allow to create an sprint with an empty sprintCode', async () => {
     const { body } = await supertest(app)
@@ -73,6 +80,13 @@ describe('POST', () => {
       .send(fakeSprint({ sprintCode: '' }))
       .expect(400);
     expect(body.error.message).toMatch(/sprintCode/i);
+  });
+  it('does not allow to create an sprint with an empty title', async () => {
+    const { body } = await supertest(app)
+      .post('/sprints')
+      .send(fakeSprint({ title: '' }))
+      .expect(400);
+    expect(body.error.message).toMatch(/title/i);
   });
   it('should return 201 and created sprint record', async () => {
     const { body } = await supertest(app)
@@ -93,7 +107,7 @@ describe('POST', () => {
 });
 
 describe('PATCH /:id', () => {
-  it('returns 404 if article does not exist', async () => {
+  it('returns 404 if sprint does not exist', async () => {
     const { body } = await supertest(app)
       .patch('/sprints/999')
       .send(fakeSprint())
@@ -122,7 +136,7 @@ describe('PATCH /:id', () => {
 
     await supertest(app)
       .patch('/sprints/222')
-      .send({ sprintCode: 'DS-1.2' })
+      .send({ sprintCode: 'DS-1.2', title: 'updated' })
       .expect(200);
 
     const { body } = await supertest(app).get('/sprints/222').expect(200);
@@ -130,6 +144,7 @@ describe('PATCH /:id', () => {
     expect(body).toEqual(
       sprintMatcher({
         id: 222,
+        title: 'updated',
         sprintCode: 'DS-1.2',
       }),
     );
@@ -144,7 +159,7 @@ describe('DELETE', () => {
 
     expect(body).toEqual(sprintMatcher({ id: 333 }));
   });
-  it('returns 404 not found when id not found in db is provided', async () => {
+  it('returns 404 not found when id was not found in db', async () => {
     const { body } = await supertest(app).delete('/sprints/123').expect(404);
 
     expect(body.error.message).toMatch(/not found/i);
