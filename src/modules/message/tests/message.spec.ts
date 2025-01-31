@@ -169,16 +169,16 @@ describe('method not allowed for not allowed HTML methods', () => {
     expect(body.error.message).toMatch(/Method not allowed f/i);
   });
   it('/messages/sprint/:sprint', async () => {
-    const username = 'WD-1.1';
+    const sprint = 'WD-1.1';
     const { body } = await supertest(app)
-      .patch(`/messages/sprint/${username}`)
+      .patch(`/messages/sprint/${sprint}`)
       .expect(405);
     expect(body.error.message).toMatch(/Method not allowed f/i);
   });
   it('/messages/username/:username', async () => {
-    const sprint = 'WD-1.1';
+    const username = 'someName';
     const { body } = await supertest(app)
-      .patch(`/messages/sprint/${sprint}`)
+      .patch(`/messages/username/${username}`)
       .expect(405);
     expect(body.error.message).toMatch(/Method not allowed f/i);
   });

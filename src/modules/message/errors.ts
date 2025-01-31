@@ -49,12 +49,12 @@ export class NotAllowedForSprint extends MethodNotAllowed {
 }
 
 export class NotAllowedForUsername extends MethodNotAllowed {
-  constructor(message = 'Method not allowed for /messages/sprint/:username') {
+  constructor(message = 'Method not allowed for /messages/username/:username') {
     super(message);
   }
 }
 
-export class NotAllowedForMessage extends MethodNotAllowed {
+export class NotAllowedForMessages extends MethodNotAllowed {
   constructor(message = 'Method not allowed for /messages') {
     super(message);
   }

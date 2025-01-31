@@ -15,7 +15,7 @@ import {
   DiscordBotError,
   NotAllowedForSprint,
   NotAllowedForUsername,
-  NotAllowedForMessage,
+  NotAllowedForMessages,
 } from './errors';
 import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
@@ -86,7 +86,7 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
     )
     .all(
       jsonRoute(async () => {
-        throw new NotAllowedForMessage();
+        throw new NotAllowedForMessages();
       }),
     );
   router
