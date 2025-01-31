@@ -163,3 +163,23 @@ describe('sprint/:sprint', async () => {
     expect(body).toEqual([]);
   });
 });
+describe('method not allowed for not allowed HTML methods', () => {
+  it('/messages', async () => {
+    const { body } = await supertest(app).patch(`/messages/`).expect(405);
+    expect(body.error.message).toMatch(/Method not allowed f/i);
+  });
+  it('/messages/sprint/:sprint', async () => {
+    const username = 'WD-1.1';
+    const { body } = await supertest(app)
+      .patch(`/messages/sprint/${username}`)
+      .expect(405);
+    expect(body.error.message).toMatch(/Method not allowed f/i);
+  });
+  it('/messages/username/:username', async () => {
+    const sprint = 'WD-1.1';
+    const { body } = await supertest(app)
+      .patch(`/messages/sprint/${sprint}`)
+      .expect(405);
+    expect(body.error.message).toMatch(/Method not allowed f/i);
+  });
+});
