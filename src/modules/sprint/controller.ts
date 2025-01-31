@@ -4,7 +4,11 @@ import { Database } from '@/database';
 import buildRepository from './repository';
 import { jsonRoute } from '@/utils/middleware';
 import * as schema from './schema';
-import { SprintNotFound } from './errors';
+import {
+  NotAllowedForSprint,
+  NotAllowedForSprints,
+  SprintNotFound,
+} from './errors';
 
 export default (db: Database) => {
   const router = Router();
@@ -19,6 +23,11 @@ export default (db: Database) => {
 
         return sprints.create(body);
       }, StatusCodes.CREATED),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForSprints();
+      }),
     );
   router
     .route('/:id(\\d+)')
@@ -54,6 +63,11 @@ export default (db: Database) => {
         if (!record) throw new SprintNotFound();
 
         return record;
+      }),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForSprint();
       }),
     );
 

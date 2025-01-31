@@ -4,7 +4,11 @@ import { Database } from '@/database';
 import { jsonRoute } from '@/utils/middleware';
 import buildRepository from './repository';
 import * as schema from './schema';
-import { TemplateNotFound } from './errors';
+import {
+  NotAllowedForTemplate,
+  NotAllowedForTemplates,
+  TemplateNotFound,
+} from './errors';
 
 export default (db: Database) => {
   const router = Router();
@@ -19,6 +23,11 @@ export default (db: Database) => {
 
         return templates.create(body);
       }, StatusCodes.CREATED),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForTemplates();
+      }),
     );
   router
     .route('/:id(\\d+)')
@@ -57,6 +66,11 @@ export default (db: Database) => {
         }
 
         return record;
+      }),
+    )
+    .all(
+      jsonRoute(async () => {
+        throw new NotAllowedForTemplate();
       }),
     );
 

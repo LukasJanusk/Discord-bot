@@ -164,3 +164,13 @@ describe('DELETE', () => {
     expect(body.error.message).toMatch(/not found/i);
   });
 });
+describe('method not allowed for not allowed HTML methods', () => {
+  it('/templates', async () => {
+    const { body } = await supertest(app).put(`/templates`).expect(405);
+    expect(body.error.message).toMatch(/Method not allowed/i);
+  });
+  it('/templates/:id', async () => {
+    const { body } = await supertest(app).put(`/templates/1`).expect(405);
+    expect(body.error.message).toMatch(/Method not allowed/i);
+  });
+});

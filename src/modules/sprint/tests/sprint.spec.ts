@@ -137,7 +137,7 @@ describe('PATCH /:id', () => {
 });
 
 describe('DELETE', () => {
-  it('deletes template', async () => {
+  it('deletes sprint', async () => {
     await createSprints([fakeSprint({ id: 333 })]);
 
     const { body } = await supertest(app).delete('/sprints/333').expect(200);
@@ -148,5 +148,16 @@ describe('DELETE', () => {
     const { body } = await supertest(app).delete('/sprints/123').expect(404);
 
     expect(body.error.message).toMatch(/not found/i);
+  });
+});
+
+describe('method not allowed for not allowed HTML methods', () => {
+  it('/sprints', async () => {
+    const { body } = await supertest(app).put(`/sprints`).expect(405);
+    expect(body.error.message).toMatch(/Method not allowed/i);
+  });
+  it('/sprints/:id', async () => {
+    const { body } = await supertest(app).put(`/sprints/1`).expect(405);
+    expect(body.error.message).toMatch(/Method not allowed/i);
   });
 });
