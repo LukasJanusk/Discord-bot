@@ -10,3 +10,14 @@ export const getLocalGif = async (
   const gif = pickRandom(gifs);
   return parseLocalGif(gif);
 };
+
+export const formatMessageForDiscord = (
+  templateText: string,
+  sprintTitle: string,
+  draftText: string,
+  userId: string,
+) =>
+  templateText
+    .replace('${<@${userId}>', userId)
+    .replace('${sprintTitle}', sprintTitle)
+    .replace('${draft}', draftText);

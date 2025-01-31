@@ -14,6 +14,7 @@ export async function up(db: Kysely<SqliteDatabase>) {
     .createTable('message')
     .addColumn('id', 'integer', (c) => c.primaryKey().autoIncrement().notNull())
     .addColumn('user_id', 'integer', (c) => c.notNull().references('user.id'))
+    .addColumn('gif_id', 'integer', (c) => c.notNull().references('gif.id'))
     .addColumn('text', 'text', (c) => c.notNull())
     .addColumn('sprint_id', 'integer', (c) =>
       c.notNull().references('sprint.id'),

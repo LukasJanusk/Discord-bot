@@ -13,26 +13,29 @@ it('throws an error due to empty/missing title (concrete)', () => {
   const templateWithoutTitle = {
     id: 13,
     title: '',
-    text: 'content',
+    text: '<@${userId}> has just completed ${sprintTitle}. ${draft}',
   };
   const templateEmptyTitle = {
     id: 13,
     title: '',
-    text: 'content',
+    text: '<@${userId}> has just completed ${sprintTitle}. ${draft}',
   };
 
   expect(() => parse(templateWithoutTitle)).toThrow(/title/i);
   expect(() => parse(templateEmptyTitle)).toThrow(/title/i);
 });
 
-it('throws an error due to empty/missing text', () => {
+it('throws an error due to empty/missing/wrong text', () => {
   const recordWithoutText = omit(['text'], fakeTemplateFull());
   const recordEmpty = fakeTemplateFull({
     text: '',
   });
-
+  const recordWithWrongTitleFormat = fakeTemplateFull({
+    text: 'This will not pass regex',
+  });
   expect(() => parse(recordWithoutText)).toThrow(/text/i);
   expect(() => parse(recordEmpty)).toThrow(/text/i);
+  expect(() => parse(recordWithWrongTitleFormat)).toThrow(/text/i);
 });
 
 describe('parseInsertable', () => {

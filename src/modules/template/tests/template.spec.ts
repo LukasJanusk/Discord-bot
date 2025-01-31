@@ -135,7 +135,10 @@ describe('PATCH /:id', () => {
 
     await supertest(app)
       .patch('/templates/222')
-      .send({ title: 'updated fake template', text: 'updated text' })
+      .send({
+        title: 'updated title',
+        text: '<@${userId}> finished ${sprintTitle}. ${draft}',
+      })
       .expect(200);
 
     const { body } = await supertest(app).get('/templates/222').expect(200);
@@ -143,8 +146,8 @@ describe('PATCH /:id', () => {
     expect(body).toEqual(
       templateMatcher({
         id: 222,
-        title: 'updated fake template',
-        text: 'updated text',
+        title: 'updated title',
+        text: '<@${userId}> finished ${sprintTitle}. ${draft}',
       }),
     );
   });

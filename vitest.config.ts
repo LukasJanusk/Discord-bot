@@ -3,12 +3,14 @@ import path from 'node:path';
 export default {
   test: {
     include: [
-      'src/**/*.spec.ts',
-      'tests/**/*.spec.ts',
-      'src/**/*.test.ts',
-      'tests/**/*.test.ts',
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      // 'src/**/*.spec.ts',
+      // 'tests/**/*.spec.ts',
+      // 'src/**/*.test.ts',
+      // 'tests/**/*.test.ts',
     ],
-    exclude: ['src/config/**'],
+    exclude: ['src/config/**', 'node_modules'],
     globals: true,
     coverage: {
       provider: 'v8',

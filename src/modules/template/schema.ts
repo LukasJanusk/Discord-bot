@@ -1,11 +1,19 @@
 import { z } from 'zod';
 import type { Template } from '@/database';
+import { draftPattern, sprintTitlePattern, userIdPatter } from '@/utils/regex';
 
 type Record = Template;
+
 const schema = z.object({
   id: z.coerce.number().int().positive(),
   title: z.string().min(1).max(100),
-  text: z.string().min(1).max(2000),
+  text: z
+    .string()
+    .min(1)
+    .max(2000)
+    .regex(draftPattern, 'Text must contain ${draft}')
+    .regex(sprintTitlePattern, 'Text must contain ${sprintTitle}')
+    .regex(userIdPatter, 'Text must contain <@${userId}>'),
 });
 
 const insertable = schema.omit({

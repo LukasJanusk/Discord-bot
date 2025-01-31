@@ -6,7 +6,7 @@ export const fakeTemplate = (
   overrides: Partial<Insertable<Template>> = {},
 ): Insertable<Template> => ({
   title: 'My Title',
-  text: 'Some Content',
+  text: '<@${userId}> has just completed ${sprintTitle}. ${draft}',
   ...overrides,
 });
 

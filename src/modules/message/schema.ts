@@ -13,6 +13,7 @@ export type RequestObject = {
 const schema = z.object({
   id: z.coerce.number().int().positive(),
   sentAt: z.string().min(1).max(100),
+  text: z.string().min(1).max(2000),
   sprintId: z.coerce.number().int().positive(),
   templateId: z.coerce.number().int().positive(),
   userId: z.coerce.number().int().positive(),
@@ -28,7 +29,7 @@ export const parseInsertable = (record: unknown) => insertable.parse(record);
 
 export const keys: (keyof Record)[] = Object.keys(
   schema.shape,
-) as (keyof z.infer<typeof schema>)[];
+) as (keyof Record)[];
 
 const requestObject = z.object({
   username: z.string().min(1).max(100),

@@ -1,14 +1,27 @@
 import type { Insertable, Selectable } from 'kysely';
 import { keys } from './schema';
-import type { User, Sprint, Message, Database } from '@/database';
+import type {
+  User,
+  Sprint,
+  Message,
+  Database,
+  Template,
+  Draft,
+} from '@/database';
 
 const TABLE = 'message';
 const SPRINT = 'sprint';
 const USER = 'user';
+const TEMPLATE = 'template';
+const DRAFT = 'draft';
 
 type Row = Message;
 type RowSprint = Sprint;
 type RowUser = User;
+type RowTemplate = Template;
+type RowDraft = Draft;
+type RowDraftSelect = Selectable<RowDraft>;
+type RowTemplateSelect = Selectable<RowTemplate>;
 type RowUserWithoutId = Omit<RowUser, 'id'>;
 type RowUserInsert = Insertable<RowUserWithoutId>;
 type RowUserSelect = Selectable<RowUser>;
@@ -36,14 +49,24 @@ export default (db: Database) => ({
       .select([
         `${TABLE}.id`,
         `${TABLE}.gifId`,
+        `${TABLE}.text`,
         `${TABLE}.sentAt`,
         `${TABLE}.sprintId`,
         `${TABLE}.templateId`,
         `${TABLE}.userId`,
       ])
-
       .where(`${SPRINT}.sprintCode`, '=', sprintCode)
       .execute();
+  },
+  findTemplate(templateId: number): Promise<RowTemplateSelect | undefined> {
+    return db
+      .selectFrom(TEMPLATE)
+      .selectAll()
+      .where(`${TEMPLATE}.id`, '=', templateId)
+      .executeTakeFirst();
+  },
+  findAllDrafts(): Promise<RowDraftSelect | undefined> {
+    return db.selectFrom(DRAFT).selectAll().executeTakeFirst();
   },
   findSprint(sprintCode: string): Promise<RowSprintSelect | undefined> {
     return db
@@ -59,6 +82,7 @@ export default (db: Database) => ({
       .select([
         `${TABLE}.id`,
         `${TABLE}.gifId`,
+        `${TABLE}.text`,
         `${TABLE}.sentAt`,
         `${TABLE}.sprintId`,
         `${TABLE}.templateId`,

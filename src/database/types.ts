@@ -25,6 +25,7 @@ export interface Gif {
 }
 
 export interface Message {
+  gifId: number;
   id: Generated<number>;
   sentAt: string;
   sprintId: number;
