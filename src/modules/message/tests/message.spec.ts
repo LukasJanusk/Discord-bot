@@ -28,6 +28,10 @@ beforeAll(async () => {
   await db.insertInto('sprint').values(fakeSprint()).execute();
   await db.insertInto('template').values(fakeTemplate()).execute();
   await db.insertInto('user').values({ username: 'someName' }).execute();
+  await db
+    .insertInto('draft')
+    .values({ title: 'testDraft', text: 'Congratulations!' })
+    .execute();
 });
 afterEach(async () => {
   await db.deleteFrom('message').execute();
@@ -94,7 +98,7 @@ describe('POST', () => {
   it('should return 201 and created message record with good Giphy api call', async () => {
     const { body } = await supertest(app)
       .post('/messages')
-      .send({ username: 'correct_name', sprintCode: 'WD-1.1' })
+      .send({ username: 'someUsername', sprintCode: 'WD-1.1' })
       .expect(201);
 
     expect(body).toEqual(
@@ -103,6 +107,7 @@ describe('POST', () => {
           sentAt: expect.any(String),
           userId: expect.any(Number),
           gifId: expect.any(Number),
+          text: '<@fakeUserId> has just completed someTitle. Congratulations!',
         }),
       ),
     );
@@ -110,7 +115,7 @@ describe('POST', () => {
   it('should return 201 and created message record with bad Giphy api call', async () => {
     const { body } = await supertest(app2)
       .post('/messages')
-      .send({ username: 'correct_name', sprintCode: 'WD-1.1' })
+      .send({ username: 'someUsername', sprintCode: 'WD-1.1' })
       .expect(201);
 
     expect(body).toEqual(
@@ -119,6 +124,7 @@ describe('POST', () => {
           sentAt: expect.any(String),
           userId: expect.any(Number),
           gifId: expect.any(Number),
+          text: '<@fakeUserId> has just completed someTitle. Congratulations!',
         }),
       ),
     );

@@ -21,12 +21,23 @@ export default (db: Database) => ({
       .where('id', '=', id)
       .executeTakeFirst();
   },
-  create(record: RowInsert): Promise<RowSelect | undefined> {
+  async create(record: RowInsert): Promise<RowSelect | undefined> {
     return db
-      .insertInto(TABLE)
-      .values(record)
-      .returning(keys)
-      .executeTakeFirst();
+      .selectFrom(TABLE)
+      .where('url', '=', record.url)
+      .select(keys)
+      .executeTakeFirst()
+      .then((existingRecord) => {
+        if (existingRecord) {
+          return existingRecord;
+        }
+
+        return db
+          .insertInto(TABLE)
+          .values(record)
+          .returning(keys)
+          .executeTakeFirst();
+      });
   },
 
   update(id: number, partial: RowUpdate): Promise<RowSelect | undefined> {

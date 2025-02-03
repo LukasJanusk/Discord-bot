@@ -65,8 +65,8 @@ export default (db: Database) => ({
       .where(`${TEMPLATE}.id`, '=', templateId)
       .executeTakeFirst();
   },
-  findAllDrafts(): Promise<RowDraftSelect | undefined> {
-    return db.selectFrom(DRAFT).selectAll().executeTakeFirst();
+  findDrafts(): Promise<RowDraftSelect[]> {
+    return db.selectFrom(DRAFT).selectAll().execute();
   },
   findSprint(sprintCode: string): Promise<RowSprintSelect | undefined> {
     return db

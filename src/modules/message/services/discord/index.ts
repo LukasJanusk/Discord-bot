@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
-import { Client } from 'discord.js';
+import { Client, GuildMember, TextChannel, User } from 'discord.js';
 import {
-  formatMessage,
   setupClient,
   createAttachment,
   buildEmbed,
@@ -13,19 +12,22 @@ import { UserNotFound } from '../../errors';
 
 export interface DiscordBot {
   client: Client;
+  channel: TextChannel;
+  /**
+   * Finds a User in TextChannel based on provided username.
+   * @param userName - The username to mention in the message.
+   * @returns A promise that resolves to User class object.
+   * @throws An error if the user was not Found.
+   */
+  getUser: (username: string) => Promise<User | GuildMember>;
   /**
    * Sends a message to a guild text channel.
    * @param message - The message content to send.
-   * @param userName - (Optional) The username to mention in the message.
-   * @param gifImage - The object containing gifUrl, width, height.
+   * @param gifImage - The object containing gifUrl.
    * @returns A promise that resolves to the sent message in the channel.
    * @throws An error if the message could not be sent.
    */
-  sendToChannel: (
-    message: string,
-    userName: string,
-    gifImage?: ParsedGif,
-  ) => Promise<boolean>;
+  sendToChannel: (message: string, gifImage?: ParsedGif) => Promise<boolean>;
 }
 
 export default async function createDiscordBot(
@@ -33,21 +35,22 @@ export default async function createDiscordBot(
   channelId: string,
 ): Promise<DiscordBot> {
   const client = await setupClient(token);
+  const channel = getChannel(client, channelId);
 
+  const getUser = async (userName: string): Promise<User | GuildMember> => {
+    const user = await findMember(channel, userName);
+    return user;
+  };
   const sendToChannel = async (
     message: string,
-    userName: string,
     gifImage?: ParsedGif,
   ): Promise<boolean> => {
-    const channel = getChannel(client, channelId);
     try {
-      const user = await findMember(channel, userName);
-      const formattedMessage = formatMessage(message, user);
       const embed = buildEmbed(gifImage);
       const attachments = createAttachment(gifImage);
 
       await channel.send({
-        content: formattedMessage,
+        content: message,
         embeds: embed ? [embed] : [],
         files: attachments,
       });
@@ -63,5 +66,5 @@ export default async function createDiscordBot(
     }
   };
 
-  return { sendToChannel, client };
+  return { sendToChannel, getUser, client, channel };
 }

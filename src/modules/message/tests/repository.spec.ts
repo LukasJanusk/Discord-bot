@@ -29,6 +29,7 @@ describe('create', () => {
   it('should create a message (explicitly listing all fields)', async () => {
     const message = await repository.create({
       sentAt: '2025-01-27T15:32:48.123Z',
+      text: 'some message text',
       sprintId: 1,
       templateId: 1,
       userId: 1,
@@ -38,6 +39,7 @@ describe('create', () => {
     expect(message).toEqual({
       id: expect.any(Number),
       sentAt: '2025-01-27T15:32:48.123Z',
+      text: 'some message text',
       sprintId: 1,
       templateId: 1,
       userId: 1,
@@ -62,6 +64,7 @@ describe('findAll', () => {
   it('should return all messages', async () => {
     const message1 = await repository.create({
       sentAt: '2025-01-27T15:32:48.123Z',
+      text: 'some message text',
       sprintId: 1,
       templateId: 1,
       userId: 1,
@@ -71,6 +74,7 @@ describe('findAll', () => {
     const message2 = await repository.create({
       sentAt: '2025-01-28T15:32:48.123Z',
       sprintId: 1,
+      text: 'some message text',
       templateId: 1,
       userId: 1,
       gifId: 1,
@@ -187,5 +191,17 @@ describe('createUser', () => {
       username: 'existingUsername',
     });
     expect(userSameName).toEqual(user);
+  });
+});
+describe('findTemplate', () => {
+  it('returns found template', async () => {
+    const idNumber = 1;
+    const template = await repository.findTemplate(idNumber);
+    expect(template).toEqual(fakeTemplate({ id: idNumber }));
+  });
+  it('returns undefined when mo template found', async () => {
+    const idNumber = 199;
+    const template = await repository.findTemplate(idNumber);
+    expect(template).toBeUndefined();
   });
 });

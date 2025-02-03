@@ -18,6 +18,6 @@ export const formatMessageForDiscord = (
   userId: string,
 ) =>
   templateText
-    .replace('${<@${userId}>', userId)
+    .replace('${userId}', userId)
     .replace('${sprintTitle}', sprintTitle)
     .replace('${draft}', draftText);

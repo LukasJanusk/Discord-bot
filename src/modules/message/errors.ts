@@ -14,7 +14,11 @@ export class GifNotFound extends NotFound {
     super(message);
   }
 }
-
+export class DraftNotFound extends NotFound {
+  constructor(message = 'Draft not found') {
+    super(message);
+  }
+}
 export class MessageCreationFailed extends DatabaseError {
   constructor(message = 'Message creation failed') {
     super(message);

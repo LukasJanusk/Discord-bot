@@ -55,6 +55,11 @@ describe('create', () => {
     const gifsInDatabase = await selectGifs();
     expect(gifsInDatabase).toEqual([gif]);
   });
+  it('should return original gif if it already in db', async () => {
+    const gifInDb = await repository.create({ url: 'url.already.indb' });
+    const originalGif = await repository.create({ url: 'url.already.indb' });
+    expect(gifInDb).toEqual(originalGif);
+  });
 });
 
 describe('findAll', () => {

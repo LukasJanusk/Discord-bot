@@ -12,6 +12,7 @@ import {
   UserCreationFailed,
   GifCreationFailed,
   GifNotFound,
+  DraftNotFound,
   DiscordBotError,
   NotAllowedForSprint,
   NotAllowedForUsername,
@@ -21,7 +22,7 @@ import pickRandom from '@/utils/random';
 import { TemplateNotFound } from '../template/errors';
 import { DiscordBot } from './services/discord';
 import { GifAPI } from './services/giphy';
-import { getLocalGif } from './utils';
+import { formatMessageForDiscord, getLocalGif } from './utils';
 import { parseInsertable as parseLocallyStoredGif } from './services/giphy/schema';
 
 export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
@@ -36,13 +37,13 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
     .post(
       jsonRoute(async (req) => {
         const { username, sprintCode } = schema.parseRequestObject(req.body);
-        const sprintInDatabase = await messages.findSprint(sprintCode);
-        if (!sprintInDatabase) {
+        const sprint = await messages.findSprint(sprintCode);
+        if (!sprint) {
           throw new SprintNotFound();
         }
-        const user = await messages.createUser({ username });
-        if (!user) throw new UserCreationFailed();
-
+        const userDb = await messages.createUser({ username });
+        if (!userDb) throw new UserCreationFailed();
+        const user = await discordBot.getUser(username);
         let gif;
         let finalGifId = null;
 
@@ -60,23 +61,35 @@ export default (db: Database, discordBot: DiscordBot, gifApi: GifAPI) => {
           gif = parseLocallyStoredGif(localGif);
           finalGifId = localGif.id;
         }
-        const allTemplates = await templates.findAll();
-        if (allTemplates.length < 1) {
+        const template = await templates.findById(1);
+        if (!template) {
           throw new TemplateNotFound();
         }
-        const template = pickRandom(allTemplates);
-        const sent = await discordBot.sendToChannel(
-          ` completed: ${sprintCode}. ${template.text}`,
-          username,
-          gif,
+        const drafts = await messages.findDrafts();
+        if (drafts.length < 1) throw new DraftNotFound();
+        const draft = pickRandom(drafts);
+        const formattedMessageText = formatMessageForDiscord(
+          template.text,
+          sprint.title,
+          draft.text,
+          user.id,
         );
+
+        const formattedMessageTextForDb = formatMessageForDiscord(
+          template.text,
+          sprint.title,
+          draft.text,
+          user.displayName,
+        );
+        const sent = await discordBot.sendToChannel(formattedMessageText, gif);
         if (sent) {
           const message = await messages.create({
             sentAt: new Date().toISOString(),
-            sprintId: sprintInDatabase.id,
+            sprintId: sprint.id,
             templateId: template.id,
-            userId: user.id,
+            userId: userDb.id,
             gifId: finalGifId,
+            text: formattedMessageTextForDb,
           });
           if (!message) throw new DiscordBotError();
           return message;

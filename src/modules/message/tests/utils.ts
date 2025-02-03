@@ -11,6 +11,7 @@ export const fakeMessage = (
   sprintId: 1,
   templateId: 1,
   userId: 1,
+  text: 'some message text',
   ...overrides,
 });
 
