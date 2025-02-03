@@ -6,6 +6,7 @@ import sprints from './modules/sprint/controller';
 import messages from './modules/message/controller';
 import { DiscordBot } from './modules/message/services/discord';
 import { GifAPI } from './modules/message/services/giphy';
+import { unsupportedRoute } from './utils/middleware';
 
 export default function createApp(
   db: Database,
@@ -18,6 +19,7 @@ export default function createApp(
   app.use('/templates', templates(db));
   app.use('/sprints', sprints(db));
   app.use('/messages', messages(db, discordBot, gifApi));
+  app.use(unsupportedRoute);
   app.use(jsonErrorHandler);
 
   return app;

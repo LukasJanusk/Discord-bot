@@ -5,7 +5,7 @@ import {
   type RequestHandler,
 } from 'express';
 import { StatusCodes } from 'http-status-codes';
-// import MethodNotAllowed from './errors/MethodNotAllowed';
+import NotFound from './errors/NotFound';
 
 type JsonHandler<T> = (
   req: Request,
@@ -34,10 +34,10 @@ export function jsonRoute<T>(
   };
 }
 
-// export function unsupportedRoute(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   next(new MethodNotAllowed());
-// }
+export function unsupportedRoute(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  next(new NotFound('The requested URL or resource does not exist.'));
+}
